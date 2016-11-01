@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+    <title>Welcome to Trivia</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js">
+    </script>
+    <link href='https://fonts.googleapis.com/css?family=Londrina+Shadow' rel='stylesheet' type='text/css'>
+    <style>
+           body{
+               background:#cc6;
+               text-align:center;
+               }
+    img {
+         margin: 40px 0px 0px 0px;
+         border: 7px solid white;
+         border-radius: 70px;
+         
+       }
+
+           h1 {
+               font-family: 'Londrina Shadow', cursive;
+               text-align: center;
+               font-size: 75px;
+               color: #aaaaff;
+               background:black;
+               margin: 30px 0 0 0;
+               }
+
+          input[type="button"] {
+               background: olive;
+           color: white;
+         border-radius: 12px;
+         font-size:16px;
+         padding:10px;
+         }
+        
+
+        #viewScore{
+            position:absolute;
+            top: 200px;
+           left: 40px;
+        }
+
+        #displayScore{
+            position:absolute;
+           top: 250px;
+           left: 40px;
+
+        }
+
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header">
+            <h1>TRIVIA</h1>
+        </div>
+    </header><img src="http://mybarhop.lookoutcreations.com/sites/default/files/topnews/homer2.png" alt="Demo Image">
+    <form>
+        <input id="viewScore" name="score" style="display:none" type="button" value="Current Score"> <input id="addQue" name="addButton" style="display:none" type="button" value="Add a question?"><br>
+        <div id="displayScore" style="display : none">
+            <label>Right :</label> <input id="right_ans" type="text"><br>
+            <label>Wrong :</label> <input id="wrong_ans" type="text">
+        </div>
+        <div id="que_display"></div>
+        <div id="queAddnew" style="display : none">
+            Question : <input id="question" name="question" placeholder="Enter question" type="text"><br>
+            Answer : <input id="answer" name="answer" placeholder="Enter answer" type="text"><br>
+            <input class="btn" id="submitBtnId" type="button" value="Submit"><br>
+        </div><input id="click_play" name="playButton" type="button" value="Let's Start The Game"><br>
+    </form>
+    <script>
+       $("#addQue").click(function(){
+
+           $("#queAddnew").show();
+           $("#que_display").hide();
+           $("#addQue").hide();
+           $("#click_play").hide();
+       });
+
+       $("#viewScore").click(function(){
+
+           $("#displayScore").show();
+           var func1 = "score";
+
+           $.ajax({
+               method: "GET",
+               url: "http://localhost:3000/"+func1,
+               crossDomain : true,
+               dataType: "json"
+               })
+               .done(function(info){
+                   if(info.answer == false){
+                       info.answer = "false";
+                       }
+                   console.log(info);
+                   $("#right_ans").val(info.right);
+                   $("#wrong_ans").val(info.wrong);
+               });
+       });
+    var func2 = "question";
+
+       $(".btn").click(function(){
+           
+       var question = $("#question").val();
+      // console.log(question);
+       var answer = $("#answer").val();
+       //console.log(answer);
+
+       var data={
+           "question":question,
+           "answer":answer
+       }    
+       
+       var dataJSON = JSON.stringify(data);
+       console.log(dataJSON);
+       $.ajax({
+           method: "POST",
+           url: "http://localhost:3000/"+func2,
+           crossDomain : true,
+           dataType: "json",
+           data: data 
+           })
+           .done(function( info ) {
+
+           if(info.answer==false){
+               info.answer="false";
+           }
+           $("#que_display").show();
+           $("#addQue").show();
+           $("#queAddnew").hide();
+
+           var displayQuestions = function(element, index, array){
+
+           
+               var len = array.length;
+               console.log(len);
+               if(index == array.length - 1){
+
+                   var $item = $('<div id="allid_que" class="btn">' +
+                               '<label>Question : <\/label><input type="text" name="que" id="id_que'+ index +'"><br>' +
+                               '<label>Answer : <\/label><input type="text" name="ans" id="id_ans"><br><\/div>' +
+                               '<input type="button" value="Send" id="send_click'+ index + '">');
+
+                   $("#que_display").append($item);
+                   $("#id_que" + index).val(array[index].question);
+               }
+
+           }
+
+           info.forEach(displayQuestions);
+
+           });    
+       });
+
+       $("#click_play").click(function(){
+
+           $("img").attr("align","right");
+
+       
+
+           $.ajax({
+               method: "GET",
+               url: "http://localhost:3000/"+func2,
+               crossDomain : true,
+               dataType: "json",
+               })
+               
+               .done(function( info ) {
+                   if(info.answer==false){
+                       info.answer="false";
+                   }
+                   $("#allid_que").show();
+                   $("#viewScore").show();
+                   $("#addQue").show();
+                   $("#queAddnew").hide();
+                   $("#click_play").hide();
+
+               var displayQuestions = function(element, index, array){
+
+                   var $item = $('<div id="allid_que" class="btn">' +
+                               '<label>Question : <\/label><input type="text" name="que" id="id_que'+ index +'"><br>' +
+                               '<label>Answer : <\/label><input type="text" name="ans" id="id_ans'+ index +'"><br><\/div>' +
+                               '<input type="button" value="Send" id="send_click'+ index + '"><br>');
+
+                   $("#que_display").append($item);
+                $("#id_que" + index).val(array[index].question);
+
+               }
+               info.forEach(displayQuestions);
+
+               var getAnswers = function(element, index, array){
+
+                   $("#send_click" + index).click(function(){
+
+                       var ans = $("#id_ans" + index).val();
+                       var id_ans = array[index]._id;
+                       var actualAns = array[index].answer;
+                       var url = "answer";
+
+                    
+                       var data = {
+                           "answer" : id_ans,
+                           "possibleAns" : ans,
+                           "answer" : actualAns
+                       }
+                       var dataJSON = JSON.stringify(data);
+                     
+                       $.ajax({
+
+                           method: "POST",
+                           url: "http://localhost:3000/"+url,
+                           crossDomain : true,
+                           dataType: "json",
+                           data : data
+                           })
+
+                           .done(function( info ) {
+
+                               
+                               if(info.answer==false){
+                                   info.answer="false";
+                               }
+
+
+                           })
+
+                   });
+               }
+               info.forEach(getAnswers);
+
+           });    
+       });
+
+    </script>
+</body>
+</html>
