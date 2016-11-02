@@ -20,7 +20,7 @@
 var express = require('express'),
     http = require('http'),
     parser = require("body-parser"),
-    movieDB = require('./modules/triviaDB'),
+    triviaDB = require('./client/javascripts/app'),
     MongoClient = require('mongodb').MongoClient,
     redis = require('redis'),
     client = redis.createClient(),
@@ -29,7 +29,7 @@ var express = require('express'),
     app;
 app = express();
 app.engine('.html', require('ejs').__express);
-app.set('views', __dirname + '/views');
+app.set('views', __dirname + '/client');
 app.set('view engine', 'html');
 client.set("right", 0);
 client.set("wrong", 0);
@@ -44,7 +44,7 @@ app.use(parser.json());
 var url = 'mongodb://localhost:27017/trivia';
 app.get('/question', function(req, res) {
     var searchQuestions = function(db, callback) {
-        var data = db.collection('questionBank').find().toArray(function(err, documents) {
+        var data = db.collection('questionBanknew').find().toArray(function(err, documents) {
             res.json(documents);
             db.close();
         });
@@ -58,11 +58,11 @@ app.post('/question', function(req, res) {
     var question = req.body["question"];
     var answer = req.body["answer"];
     var insert = function(db, callback) {
-        db.collection('questionBank').insert({
+        db.collection('questionBanknew').insert({
             "question": question,
             "answer": answer
         });
-        var data = db.collection('questionBank').find().toArray(function(err, documents) {
+        var data = db.collection('questionBanknew').find().toArray(function(err, documents) {
             res.json(documents);
         });
     };
@@ -75,20 +75,24 @@ app.post('/question', function(req, res) {
 });
 app.post('/answer', function(req, res) {
     var possible = req.body["possibleAns"];
+    //console.log(possible);
     var id = req.body["answerId"];
     var actual = req.body["answer"];
+    //console.log(actual);
     var correct;
     if (actual == possible) {
         client.incr("right", function(err, reply) {
             console.log("Right: " + reply);
         });
-        res.json(true);
+        var demo = {"correct":true};
+        res.json(demo);
     }
     if (actual != possible) {
         client.incr("wrong", function(err, reply) {
             console.log("Wrong: " + reply);
         });
-        res.json(false);
+        var demo = {"correct":false}
+        res.json(demo);
     }
 });
 app.get('/score', function(req, res) {
@@ -107,7 +111,7 @@ app.get('/score', function(req, res) {
         });
     });
 });
-require('./routes/index')(app);
+require('./client/javascripts/routes')(app);
 app.listen(3000, function() {
-    console.log('server is listening on port 3000');
+    console.log('localhost:3000');
 });

@@ -2,9 +2,9 @@
 <html lang="en-US">
 <head>
     <title>Welcome to Trivia</title>
+    <link href='https://fonts.googleapis.com/css?family=Londrina+Shadow' rel='stylesheet' type='text/css'>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js">
     </script>
-    <link href='https://fonts.googleapis.com/css?family=Londrina+Shadow' rel='stylesheet' type='text/css'>
     <style>
            body{
                background:#cc6;
@@ -57,7 +57,7 @@
         </div>
     </header><img src="http://mybarhop.lookoutcreations.com/sites/default/files/topnews/homer2.png" alt="Demo Image">
     <form>
-        <input id="viewScore" name="score" style="display:none" type="button" value="Current Score"> <input id="addQue" name="addButton" style="display:none" type="button" value="Add a question?"><br>
+        <input id="viewScore" name="score" style="display:none" type="button" value="Scores"> <input id="addQue" name="addButton" style="display:none" type="button" value="Add a question?"><br>
         <div id="displayScore" style="display : none">
             <label>Right :</label> <input id="right_ans" type="text"><br>
             <label>Wrong :</label> <input id="wrong_ans" type="text">
@@ -79,7 +79,8 @@
        });
 
        $("#viewScore").click(function(){
-
+           $("#right_ans").show();
+           $("#wrong_ans").show();
            $("#displayScore").show();
            var func1 = "score";
 
@@ -112,8 +113,8 @@
            "answer":answer
        }    
        
-       var dataJSON = JSON.stringify(data);
-       console.log(dataJSON);
+       var jsonData = JSON.stringify(data);
+       console.log(jsonData);
        $.ajax({
            method: "POST",
            url: "http://localhost:3000/"+func2,
@@ -138,8 +139,8 @@
                if(index == array.length - 1){
 
                    var $item = $('<div id="allid_que" class="btn">' +
-                               '<label>Question : <\/label><input type="text" name="que" id="id_que'+ index +'"><br>' +
-                               '<label>Answer : <\/label><input type="text" name="ans" id="id_ans"><br><\/div>' +
+                               '<label>Question : </label><input type="text" name="que" id="id_que'+ index +'"><br>' +
+                               '<label>Answer : </label><input type="text" name="ans" id="id_ans"><br></div>' +
                                '<input type="button" value="Send" id="send_click'+ index + '">');
 
                    $("#que_display").append($item);
@@ -179,8 +180,8 @@
                var displayQuestions = function(element, index, array){
 
                    var $item = $('<div id="allid_que" class="btn">' +
-                               '<label>Question : <\/label><input type="text" name="que" id="id_que'+ index +'"><br>' +
-                               '<label>Answer : <\/label><input type="text" name="ans" id="id_ans'+ index +'"><br><\/div>' +
+                               '<label>Question : </label><input type="text" name="que" id="id_que'+ index +'"><br>' +
+                               '<label>Answer : </label><input type="text" name="ans" id="id_ans'+ index +'"><br></div>' +
                                '<input type="button" value="Send" id="send_click'+ index + '"><br>');
 
                    $("#que_display").append($item);
@@ -192,7 +193,9 @@
                var getAnswers = function(element, index, array){
 
                    $("#send_click" + index).click(function(){
-
+                       $("#right_ans").hide();
+                       $("#wrong_ans").hide();
+                       $("#displayScore").hide();
                        var ans = $("#id_ans" + index).val();
                        var id_ans = array[index]._id;
                        var actualAns = array[index].answer;
@@ -204,7 +207,7 @@
                            "possibleAns" : ans,
                            "answer" : actualAns
                        }
-                       var dataJSON = JSON.stringify(data);
+                       var jsonData = JSON.stringify(data);
                      
                        $.ajax({
 
@@ -231,7 +234,6 @@
 
            });    
        });
-
     </script>
 </body>
 </html>
